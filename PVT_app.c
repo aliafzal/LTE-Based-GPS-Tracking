@@ -106,6 +106,248 @@ struct Packet{
 };
 
 
+char *str2md5(const char *str, int length) {
+    int n;
+    MD5_CTX c;
+    unsigned char digest[16];
+    char *out = (char*)malloc(33);
+
+    MD5_Init(&c);
+
+    while (length > 0) {
+        if (length > 512) {
+            MD5_Update(&c, str, 512);
+        } else {
+            MD5_Update(&c, str, length);
+        }
+        length -= 512;
+        str += 512;
+    }
+
+    MD5_Final(digest, &c);
+
+    for (n = 0; n < 16; ++n) {
+        snprintf(&(out[n*2]), 16*2, "%02x", (unsigned int)digest[n]);
+    }
+
+    return out;
+}
+
+
+void padding(char * in, char *out)
+{
+  strncpy(out,in,4);
+  int a;
+  for(a = 4;a < 16;a++)
+  {
+    out[a] = 12;
+  }
+}
+
+void substring(char s[], char sub[], int p, int l) {
+   int c = 0;
+
+   while (c < l) {
+      sub[c] = s[p+c-1];
+      c++;
+   }
+   sub[c] = '\0';
+}
+
+char ascii_to_binary(char in)
+{
+    char ou;
+    if(in >= 48 && in<= 57)
+    {
+        ou = in - 48;
+    }
+    else if(in >= 65 && in<= 70)
+    {
+        ou = in - 55;
+    }
+    else
+    {
+        ou = in - 87;
+    }
+    return ou;
+}
+
+void hex_string_to_char_string(unsigned char *inp, unsigned char *out)
+{
+    int b = 0;
+    char in,ou;
+    char a;
+    for(a = 0; a<strlen(inp);a=a+2)
+    {
+        in = ascii_to_binary(inp[a]);
+        out[b] = in << 4;
+        ou = out[b];
+        in = ascii_to_binary(inp[a+1]);
+        out[b] += in;
+        ou = out[b];
+        b++;
+    }
+}
+
+//print string in hex
+void print_hex(const char *s)
+{
+  while(*s)
+    printf("%02x", (unsigned int) *s++);
+  printf("\n");
+}
+
+void pkcs5_padding(unsigned char *in, unsigned char *ou, unsigned char key_size)
+{
+    unsigned char a = key_size - strlen(in);
+    unsigned char diff = key_size - a;
+    unsigned char d;
+    strcpy(ou,in);
+    unsigned char dd[16];
+    strncpy(dd,in,diff);
+    for (d = diff; d<key_size;d++)
+    {
+        ou[d] = a;
+    }
+    ou[d] = '\0';
+}
+
+
+void string_to_hex(char * in, char *out)
+{
+    int i,j;
+    for(i=0,j=0;i<strlen(in);i++,j+=2)
+    {
+        sprintf((char*)out+j,"%02X",in[i]);
+    }
+    out[strlen(in)*2]='\0';
+}
+
+
+struct gps{
+    float lat;
+    float lon;
+};
+
+void header_data_conv(char *in, char * out)
+{
+  unsigned char c;
+  out[0] = in[0];
+  out[1] = in[1];
+  out[2] = in[2];
+  out[3] = in[8];
+  out[4] = in[9];
+  out[5] = in[10];
+  out[6] = in[11];
+  out[7] = in[12];
+  out[8] = in[13];
+  out[9] = in[14];
+  out[10] = in[15];
+  out[11] = in[16];
+  out[12] = in[17];
+  out[13] = in[18];
+  out[14] = in[19];
+  out[15] = in[20];
+  out[16] = in[21];
+  out[17] = in[22];
+  out[18] = in[23];
+  out[19] = in[24];
+  out[20] = in[25];
+  out[21] = in[26];
+  out[22] = in[27];
+  out[23] = in[28];
+  out[24] = in[29];
+  out[25] = in[30];
+  out[26] = in[31];
+}
+
+
+void gps_data_conv(char *in, char * out)
+{
+  in[0] = out[0];
+  in[1] = out[1];
+  in[2] = out[2];
+  in[3] = out[3];
+  in[4] = out[4];
+  in[5] = out[5];
+  in[6] = out[6];
+  in[7] = out[7];
+}
+
+//! Byte swap unsigned short
+uint16_t swap_uint16( uint16_t val )
+{
+    return (val << 8) | (val >> 8 );
+}
+
+//! Byte swap short
+int16_t swap_int16( int16_t val )
+{
+    return (val << 8) | ((val >> 8) & 0xFF);
+}
+
+//! Byte swap unsigned int
+uint32_t swap_uint32( uint32_t val )
+{
+    val = ((val << 8) & 0xFF00FF00 ) | ((val >> 8) & 0xFF00FF );
+    return (val << 16) | (val >> 16);
+}
+
+//! Byte swap int
+int32_t swap_int32( int32_t val )
+{
+    val = ((val << 8) & 0xFF00FF00) | ((val >> 8) & 0xFF00FF );
+    return (val << 16) | ((val >> 16) & 0xFFFF);
+}
+
+int64_t swap_int64( int64_t val )
+{
+    val = ((val << 8) & 0xFF00FF00FF00FF00ULL ) | ((val >> 8) & 0x00FF00FF00FF00FFULL );
+    val = ((val << 16) & 0xFFFF0000FFFF0000ULL ) | ((val >> 16) & 0x0000FFFF0000FFFFULL );
+    return (val << 32) | ((val >> 32) & 0xFFFFFFFFULL);
+}
+uint64_t swap_uint64( uint64_t val )
+{
+    val = ((val << 8) & 0xFF00FF00FF00FF00ULL ) | ((val >> 8) & 0x00FF00FF00FF00FFULL );
+    val = ((val << 16) & 0xFFFF0000FFFF0000ULL ) | ((val >> 16) & 0x0000FFFF0000FFFFULL );
+    return (val << 32) | (val >> 32);
+}
+
+//! Byte swap float
+float ReverseFloat( const float inFloat )
+{
+   float retVal;
+   char *floatToConvert = ( char* ) & inFloat;
+   char *returnFloat = ( char* ) & retVal;
+
+   // swap the bytes into a temporary buffer
+   returnFloat[0] = floatToConvert[3];
+   returnFloat[1] = floatToConvert[2];
+   returnFloat[2] = floatToConvert[1];
+   returnFloat[3] = floatToConvert[0];
+
+   return retVal;
+}
+
+//packet structure
+struct Packet{
+    uint8_t packet_version;
+    uint8_t battery_level;
+    int8_t temperature;
+    uint64_t timestampe;
+    uint16_t gps_lock_time;
+    uint16_t lte_time_to_attach;;
+    uint16_t diagnostic_events;
+    uint16_t location_area_code;
+    uint32_t cell_tower_id;
+    uint8_t rssi;
+    uint8_t operation_mode;
+    uint8_t flags;
+    uint8_t payload_contents;
+
+};
+
+
 struct gps gpsData(void)
 {
   gpOS_task_delay(1 * gpOS_timer_ticks_per_sec());
