@@ -1,14 +1,4 @@
-/*********************************************************************************************
-   FILE:          PVT_app.c
-----------------------------------------------------------------------------------------------
-   DESCRIPTION: Every 2 second, it gets GNSS position/speed.time and displays it in Debug log
-----------------------------------------------------------------------------------------------
-   COPYRIGHT:     (c) 2016 STMicroelectronics
-**********************************************************************************************/
 
-/*****************************************************************************
-   includes
-*****************************************************************************/
 // System includes
 #include <stdio.h>
 #include <string.h>
@@ -328,24 +318,6 @@ float ReverseFloat( const float inFloat )
 
    return retVal;
 }
-
-//packet structure
-struct Packet{
-    uint8_t packet_version;
-    uint8_t battery_level;
-    int8_t temperature;
-    uint64_t timestampe;
-    uint16_t gps_lock_time;
-    uint16_t lte_time_to_attach;;
-    uint16_t diagnostic_events;
-    uint16_t location_area_code;
-    uint32_t cell_tower_id;
-    uint8_t rssi;
-    uint8_t operation_mode;
-    uint8_t flags;
-    uint8_t payload_contents;
-
-};
 
 
 struct gps gpsData(void)
